@@ -170,9 +170,11 @@ function getAvailMoves($selBoard,$loc){
   $locIn = getSpaceIndex $loc
   $x = $locIn[0]; $y = $locIn[1]
   $x = $x -as [int]; $y = $y -as [int]
-  $piece = $Global:boards.(1)[$x,$y]
+  $piece = $Global:boards.($selBoard)[$x,$y]
   $piece = $piece -as [String]
+  $pPos = $piece.split("-")[2]
   $pType = $piece.split("-")[2]
+  $emSp = "" ; 1..(("$($selBoard)-x-xx-x").Length) | % {$emSp += "."}
   if($piece.split("-")[1] -eq "1"){
     $pDir = -1
   }
@@ -184,9 +186,10 @@ function getAvailMoves($selBoard,$loc){
     "pa" {
       $m1x = $x
       $m1y = ($y + (1 * $pDir))
-      #Need additional check for piece overlap
       if(($m1x -ge 0 -and $m1x -lt 10) -and ($m1y -ge 0 -and $m1y -lt 10)){
-        $moveSet += getSpaceLoc @($m1x,$m1y)
+        if($Global:boards.($selBoard)[$m1x,$m1y] -eq $emSp -or ($Global:boards.($selBoard)[$m1x,$m1y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m1x,$m1y)
+        }
       }
       return $moveSet
       break

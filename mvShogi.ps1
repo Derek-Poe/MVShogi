@@ -16,20 +16,54 @@ function newBoard(){
   $Global:boards | Add-Member -MemberType NoteProperty -Name $Global:boardNum -Value $board
 }
 
-function showBoard($board){
+function showBoard($selBoard,$player,$selPiece,$availMoves){
+  $board = $Global:boards.($selBoard)
   if($board -ne $null){
+    if($selPiece -ne $null){
+      $selPieceInTemp = getSpaceIndex $selPiece
+      $selPieceIn = "$($selPieceInTemp[0]),$($selPieceInTemp[1])"
+    }
+    if($availMoves -ne $null){
+      $availMovesIn = @()
+      forEach($availMove in $availMoves){
+        $availMoveTemp = getSpaceIndex $availMove
+        $availMovesIn += "$($availMoveTemp[0]),$($availMoveTemp[1])"
+      }
+    }
+    $emSp = "" ; 1..(("$($selBoard)-x-xx-x").Length) | % {$emSp += "."}
     $ws = "" ; 1..(($board[0,0]).Length) | % {$ws += " "}
-    $boardView = "9$ws`8$ws`7$ws`6$ws`5$ws`4$ws`3$ws`2$ws`1$ws`n`n"
-    #$char = 97
+    Write-Host "`n`n`n`n`n`n`n`n`n`n" -NoNewline
+    Write-Host -f Gray "9$ws`8$ws`7$ws`6$ws`5$ws`4$ws`3$ws`2$ws`1$ws`n`n" -NoNewline
     $char = 65
     for($i = 0; $i -lt 9; $i++){
       for($ii = 0; $ii -lt 9; $ii++){
-        $boardView += "$($board[$ii,$i]) "
+        $in = "$ii,$i"
+        if($in -in $availMovesIn){
+          Write-Host -f Red "$($board[$ii,$i]) " -NoNewline
+        }
+        elseIf($board[$ii,$i] -eq $emSp){
+          Write-Host -f DarkCyan "$emSp " -NoNewline
+        }
+        elseIf($board[$ii,$i].Split("-")[1] -eq $player -or $player -eq 0){
+          if($selPiece -eq $null){
+            Write-Host -f Yellow "$($board[$ii,$i]) " -NoNewline
+          }
+          else{
+            if($in -eq $selPieceIn){
+              Write-Host -f Magenta "$($board[$ii,$i]) " -NoNewline
+            }
+            else{
+              Write-Host -f DarkYellow "$($board[$ii,$i]) " -NoNewline
+            }
+          }
+        }
+        else{
+          Write-Host -f White "$($board[$ii,$i]) " -NoNewline
+        }
       }
-      $boardView += "  $([char]$char)`n"
+      Write-Host -f Gray "  $([char]$char)`n" -NoNewline
       $char++
     }
-    Write-Host -f Yellow "`n`n`n`n$boardView"
   }
   else{
     Write-Host -f Magenta "Null Board"
@@ -172,7 +206,7 @@ function getAvailMoves($selBoard,$loc){
   $x = $x -as [int]; $y = $y -as [int]
   $piece = $Global:boards.($selBoard)[$x,$y]
   $piece = $piece -as [String]
-  $pPos = $piece.split("-")[2]
+  $pPos = $piece.split("-")[1]
   $pType = $piece.split("-")[2]
   $emSp = "" ; 1..(("$($selBoard)-x-xx-x").Length) | % {$emSp += "."}
   if($piece.split("-")[1] -eq "1"){
@@ -194,6 +228,29 @@ function getAvailMoves($selBoard,$loc){
       return $moveSet
       break
     }
+    "la" {
+      $searchMove = $true
+      $m1ys = $y
+      while($searchMove){
+        $m1x = $x
+        $m1y = ($m1ys + (1 * $pDir))
+        if(($m1x -ge 0 -and $m1x -lt 10) -and ($m1y -ge 0 -and $m1y -lt 10)){
+          if($Global:boards.($selBoard)[$m1x,$m1y] -ne $emSp){
+            $searchMove = $false
+          }
+          if(($Global:boards.($selBoard)[$m1x,$m1y]).Split("-")[1] -ne $pPos){
+            #Write-Host -f DarkYellow $Global:boards.($selBoard)[$m1x,$m1y]
+            $moveSet += getSpaceLoc @($m1x,$m1y)
+          }
+          $m1ys = $m1y        
+        }
+        else{
+          $searchMove = $false
+        }
+      }
+      return $moveSet
+      break
+    }
   }
 }
 
@@ -207,13 +264,98 @@ function movePiece($selBoard,$orig,$dest){
     $Global:boards.($selBoard)[$origIn] = $emSp
   }
   elseIf(($Global:boards.($selBoard)[$destIn]).Split("-")[1] -ne ($Global:boards.($selBoard)[$origIn]).Split("-")[1]){
-    $Global:prison.(($Global:boards.($selBoard)[$origIn]).Split("-")[1]) += $Global:boards.($selBoard)[$destIn]
+    $Global:prison.(($Global:boards.($selBoard)[$origIn]).Split("-")[1]) += ($Global:boards.($selBoard)[$destIn]).ToLower()
     $Global:boards.($selBoard)[$destIn] = $Global:boards.($selBoard)[$origIn]
     $Global:boards.($selBoard)[$origIn] = $emSp
   }
 }
 
+function dropPiece($selBoard,$piece,$dest){
+  
+}
+
+function newMV($selBoard,$origIn,$destIn){
+  
+}
+
+function guidedMovePiece($player){
+  function selectPlayer(){
+    $player = Read-Host "`nSelect Player (1 or 2)"
+    $player = ($player -as [int])
+    if($player -gt 0 -and $player -le 2){
+      return $player 
+    }
+    else{
+      Write-Host -f Magenta "Invalid Selection"
+      pause
+      selectPlayer
+    }
+  }
+  function selectBoard(){
+    $boardsAvail = $Global:boards.PSObject.Properties.Name.Length
+    if($boardsAvail -ne 1){
+      $boardChoice = Read-Host "`nSelect Board ($boardsAvail Available)"
+      $boardChoice = ($boardChoice -as [int])
+      if($boardChoice -gt 0 -and $boardChoice -le $boardsAvail){
+        return $boardChoice
+      }
+      else{
+        Write-Host -f Magenta "Invalid Selection"
+        pause
+        selectBoard
+      }
+    }
+    else{
+      return 1
+    }
+  }
+  function selectPiece($boardChoice,$player){
+    showBoard $boardChoice $player
+    $pieceChoice = Read-Host "`nSelect Piece"
+    $pieceChoice = $pieceChoice.ToUpper()
+    if($Global:boards.($boardChoice)[(getSpaceIndex $pieceChoice)].Split("-")[1] -eq ($player -as [String])){
+      return $pieceChoice
+    }
+    else{
+      Write-Host -f Magenta "Invalid Selection"
+      pause
+      selectPiece $boardChoice $player
+    }
+  }
+  function selectMove($boardChoice,$player,$pieceChoice){
+    $availMoves = getAvailMoves $boardChoice $pieceChoice
+    showBoard $boardChoice $player $pieceChoice $availMoves
+    $moveChoice = Read-Host "`nSelect Move"
+    $moveChoice = $moveChoice.ToUpper()
+    if($moveChoice -in $availMoves){
+      return $moveChoice
+    }
+    else{
+      Write-Host -f Magenta "Invalid Selection"
+      pause
+      selectMove $boardChoice $player $pieceChoice
+    }
+  }
+  function guidedMovePieceMaster($player){
+    if($player -eq $null){
+      $player = selectPlayer
+    }
+    $boardChoice = selectBoard
+    $pieceChoice = selectPiece $boardChoice $player
+    $moveChoice = selectMove $boardChoice $player $pieceChoice
+    movepiece $boardChoice $pieceChoice $moveChoice
+    showBoard $boardChoice 0 $null $null
+  }
+  guidedMovePieceMaster $player
+}
+
 newBoard
-showBoard $Global:boards.(1)
-getAvailMoves 1 "9C"
-movePiece 1 "9C" "9D"
+#guidedMovePiece
+#getAvailMoves 1 "9A"
+#movePiece 1 "9C" "9D"
+#showBoard 1 1 "5G" @("5F","5E","5D","5C")
+
+while(1){
+  guidedMovePiece 1
+  guidedMovePiece 2
+}

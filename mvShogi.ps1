@@ -33,6 +33,9 @@ function showBoard($selBoard,$player,$selPiece,$availMoves){
     $emSp = "" ; 1..(("$($selBoard)-x-xx-x").Length) | % {$emSp += "."}
     $ws = "" ; 1..(($board[0,0]).Length) | % {$ws += " "}
     Write-Host "`n`n`n`n`n`n`n`n`n`n" -NoNewline
+    if($player -ne $null){
+      Write-Host -f Green "Player: $player`n`n" -NoNewline
+    }
     Write-Host -f Gray "9$ws`8$ws`7$ws`6$ws`5$ws`4$ws`3$ws`2$ws`1$ws`n`n" -NoNewline
     $char = 65
     for($i = 0; $i -lt 9; $i++){
@@ -44,7 +47,7 @@ function showBoard($selBoard,$player,$selPiece,$availMoves){
         elseIf($board[$ii,$i] -eq $emSp){
           Write-Host -f DarkCyan "$emSp " -NoNewline
         }
-        elseIf($board[$ii,$i].Split("-")[1] -eq $player -or $player -eq 0){
+        elseIf($board[$ii,$i].Split("-")[1] -eq $player -or $player -eq $null){
           if($selPiece -eq $null){
             Write-Host -f Yellow "$($board[$ii,$i]) " -NoNewline
           }
@@ -217,6 +220,52 @@ function getAvailMoves($selBoard,$loc){
   }
   $moveSet = @()
   switch($pType){
+    {$_ -eq "go" -or $_ -eq "p+" -or $_ -eq "s+" -or $_ -eq "k+" -or $_ -eq "l+"} {
+      $m1x = $x
+      $m1y = ($y + (1 * $pDir))
+      if(($m1x -ge 0 -and $m1x -lt 10) -and ($m1y -ge 0 -and $m1y -lt 10)){
+        if($Global:boards.($selBoard)[$m1x,$m1y] -eq $emSp -or ($Global:boards.($selBoard)[$m1x,$m1y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m1x,$m1y)
+        }
+      }
+      $m2x = $x - 1
+      $m2y = ($y + (1 * $pDir))
+      if(($m2x -ge 0 -and $m2x -lt 10) -and ($m2y -ge 0 -and $m2y -lt 10)){
+        if($Global:boards.($selBoard)[$m2x,$m2y] -eq $emSp -or ($Global:boards.($selBoard)[$m2x,$m2y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m2x,$m2y)
+        }
+      }
+      $m3x = $x + 1
+      $m3y = ($y + (1 * $pDir))
+      if(($m3x -ge 0 -and $m3x -lt 10) -and ($m3y -ge 0 -and $m3y -lt 10)){
+        if($Global:boards.($selBoard)[$m3x,$m3y] -eq $emSp -or ($Global:boards.($selBoard)[$m3x,$m3y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m3x,$m3y)
+        }
+      }
+      $m4x = $x - 1
+      $m4y = $y
+      if(($m4x -ge 0 -and $m4x -lt 10) -and ($m4y -ge 0 -and $m4y -lt 10)){
+        if($Global:boards.($selBoard)[$m4x,$m4y] -eq $emSp -or ($Global:boards.($selBoard)[$m4x,$m4y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m4x,$m4y)
+        }
+      }
+      $m5x = $x + 1
+      $m5y = $y
+      if(($m5x -ge 0 -and $m5x -lt 10) -and ($m5y -ge 0 -and $m5y -lt 10)){
+        if($Global:boards.($selBoard)[$m5x,$m5y] -eq $emSp -or ($Global:boards.($selBoard)[$m5x,$m5y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m5x,$m5y)
+        }
+      }
+      $m6x = $x
+      $m6y = ($y - (1 * $pDir))
+      if(($m6x -ge 0 -and $m6x -lt 10) -and ($m6y -ge 0 -and $m6y -lt 10)){
+        if($Global:boards.($selBoard)[$m6x,$m6y] -eq $emSp -or ($Global:boards.($selBoard)[$m6x,$m6y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m6x,$m6y)
+        }
+      }
+      return $moveSet
+      break
+    }
     "pa" {
       $m1x = $x
       $m1y = ($y + (1 * $pDir))
@@ -251,6 +300,371 @@ function getAvailMoves($selBoard,$loc){
       return $moveSet
       break
     }
+    "ro" {
+      forEach($mDir in @(1, -1)){
+        $searchMove = $true
+        $m1ys = $y
+        while($searchMove){
+          $m1x = $x
+          $m1y = ($m1ys + (1 * $mDir))
+          if(($m1x -ge 0 -and $m1x -lt 10) -and ($m1y -ge 0 -and $m1y -lt 10)){
+            if($Global:boards.($selBoard)[$m1x,$m1y] -ne $emSp){
+              $searchMove = $false
+            }
+            if(($Global:boards.($selBoard)[$m1x,$m1y]).Split("-")[1] -ne $pPos){
+              #Write-Host -f DarkYellow $Global:boards.($selBoard)[$m1x,$m1y]
+              $moveSet += getSpaceLoc @($m1x,$m1y)
+            }
+            $m1ys = $m1y        
+          }
+          else{
+            $searchMove = $false
+          }
+        }
+      }
+      forEach($mDir in @(1, -1)){
+        $searchMove = $true
+        $m2xs = $x
+        while($searchMove){
+          $m2x = ($m2xs + (1 * $mDir))
+          $m2y = $y
+          if(($m2x -ge 0 -and $m2x -lt 10) -and ($m2y -ge 0 -and $m2y -lt 10)){
+            if($Global:boards.($selBoard)[$m2x,$m2y] -ne $emSp){
+              $searchMove = $false
+            }
+            if(($Global:boards.($selBoard)[$m2x,$m2y]).Split("-")[1] -ne $pPos){
+              #Write-Host -f DarkYellow $Global:boards.($selBoard)[$m2x,$m2y]
+              $moveSet += getSpaceLoc @($m2x,$m2y)
+            }
+            $m2xs = $m2x        
+          }
+          else{
+            $searchMove = $false
+          }
+        }
+      }
+      return $moveSet
+      break
+    }
+    "bi" {
+      forEach($mDir in @(1, -1)){
+        $searchMove = $true
+        $m1xs = $x
+        $m1ys = $y
+        while($searchMove){
+          $m1x = ($m1xs + (1 * $mDir))
+          $m1y = ($m1ys - (1 * $mDir))
+          if(($m1x -ge 0 -and $m1x -lt 10) -and ($m1y -ge 0 -and $m1y -lt 10)){
+            if($Global:boards.($selBoard)[$m1x,$m1y] -ne $emSp){
+              $searchMove = $false
+            }
+            if(($Global:boards.($selBoard)[$m1x,$m1y]).Split("-")[1] -ne $pPos){
+              #Write-Host -f DarkYellow $Global:boards.($selBoard)[$m1x,$m1y]
+              $moveSet += getSpaceLoc @($m1x,$m1y)
+            }
+            $m1xs = $m1x
+            $m1ys = $m1y        
+          }
+          else{
+            $searchMove = $false
+          }
+        }
+      }
+      forEach($mDir in @(1, -1)){
+        $searchMove = $true
+        $m2ys = $y
+        $m2xs = $x
+        while($searchMove){
+          $m2x = ($m2xs + (1 * $mDir))
+          $m2y = ($m2ys + (1 * $mDir))
+          if(($m2x -ge 0 -and $m2x -lt 10) -and ($m2y -ge 0 -and $m2y -lt 10)){
+            if($Global:boards.($selBoard)[$m2x,$m2y] -ne $emSp){
+              $searchMove = $false
+            }
+            if(($Global:boards.($selBoard)[$m2x,$m2y]).Split("-")[1] -ne $pPos){
+              #Write-Host -f DarkYellow $Global:boards.($selBoard)[$m2x,$m2y]
+              $moveSet += getSpaceLoc @($m2x,$m2y)
+            }
+            $m2xs = $m2x
+            $m2ys = $m2y      
+          }
+          else{
+            $searchMove = $false
+          }
+        }
+      }
+      return $moveSet
+      break
+    }
+    "kn" {
+      $m1x = $x + 1
+      $m1y = ($y + (2 * $pDir))
+      if(($m1x -ge 0 -and $m1x -lt 10) -and ($m1y -ge 0 -and $m1y -lt 10)){
+        if($Global:boards.($selBoard)[$m1x,$m1y] -eq $emSp -or ($Global:boards.($selBoard)[$m1x,$m1y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m1x,$m1y)
+        }
+      }
+      $m2x = $x - 1
+      $m2y = ($y + (2 * $pDir))
+      if(($m2x -ge 0 -and $m2x -lt 10) -and ($m2y -ge 0 -and $m2y -lt 10)){
+        if($Global:boards.($selBoard)[$m2x,$m2y] -eq $emSp -or ($Global:boards.($selBoard)[$m2x,$m2y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m2x,$m2y)
+        }
+      }
+      return $moveSet
+      break
+    }
+    "si" {
+      $m1x = $x
+      $m1y = ($y + (1 * $pDir))
+      if(($m1x -ge 0 -and $m1x -lt 10) -and ($m1y -ge 0 -and $m1y -lt 10)){
+        if($Global:boards.($selBoard)[$m1x,$m1y] -eq $emSp -or ($Global:boards.($selBoard)[$m1x,$m1y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m1x,$m1y)
+        }
+      }
+      $m2x = $x - 1
+      $m2y = ($y + (1 * $pDir))
+      if(($m2x -ge 0 -and $m2x -lt 10) -and ($m2y -ge 0 -and $m2y -lt 10)){
+        if($Global:boards.($selBoard)[$m2x,$m2y] -eq $emSp -or ($Global:boards.($selBoard)[$m2x,$m2y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m2x,$m2y)
+        }
+      }
+      $m3x = $x + 1
+      $m3y = ($y + (1 * $pDir))
+      if(($m3x -ge 0 -and $m3x -lt 10) -and ($m3y -ge 0 -and $m3y -lt 10)){
+        if($Global:boards.($selBoard)[$m3x,$m3y] -eq $emSp -or ($Global:boards.($selBoard)[$m3x,$m3y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m3x,$m3y)
+        }
+      }
+      $m4x = $x - 1
+      $m4y = ($y - (1 * $pDir))
+      if(($m4x -ge 0 -and $m4x -lt 10) -and ($m4y -ge 0 -and $m4y -lt 10)){
+        if($Global:boards.($selBoard)[$m4x,$m4y] -eq $emSp -or ($Global:boards.($selBoard)[$m4x,$m4y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m4x,$m4y)
+        }
+      }
+      $m5x = $x + 1
+      $m5y = ($y - (1 * $pDir))
+      if(($m5x -ge 0 -and $m5x -lt 10) -and ($m5y -ge 0 -and $m5y -lt 10)){
+        if($Global:boards.($selBoard)[$m5x,$m5y] -eq $emSp -or ($Global:boards.($selBoard)[$m5x,$m5y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m5x,$m5y)
+        }
+      }
+      return $moveSet
+      break
+    }
+    "ki" {
+      $m1x = $x
+      $m1y = ($y + (1 * $pDir))
+      if(($m1x -ge 0 -and $m1x -lt 10) -and ($m1y -ge 0 -and $m1y -lt 10)){
+        if($Global:boards.($selBoard)[$m1x,$m1y] -eq $emSp -or ($Global:boards.($selBoard)[$m1x,$m1y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m1x,$m1y)
+        }
+      }
+      $m2x = $x - 1
+      $m2y = ($y + (1 * $pDir))
+      if(($m2x -ge 0 -and $m2x -lt 10) -and ($m2y -ge 0 -and $m2y -lt 10)){
+        if($Global:boards.($selBoard)[$m2x,$m2y] -eq $emSp -or ($Global:boards.($selBoard)[$m2x,$m2y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m2x,$m2y)
+        }
+      }
+      $m3x = $x + 1
+      $m3y = ($y + (1 * $pDir))
+      if(($m3x -ge 0 -and $m3x -lt 10) -and ($m3y -ge 0 -and $m3y -lt 10)){
+        if($Global:boards.($selBoard)[$m3x,$m3y] -eq $emSp -or ($Global:boards.($selBoard)[$m3x,$m3y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m3x,$m3y)
+        }
+      }
+      $m4x = $x - 1
+      $m4y = $y
+      if(($m4x -ge 0 -and $m4x -lt 10) -and ($m4y -ge 0 -and $m4y -lt 10)){
+        if($Global:boards.($selBoard)[$m4x,$m4y] -eq $emSp -or ($Global:boards.($selBoard)[$m4x,$m4y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m4x,$m4y)
+        }
+      }
+      $m5x = $x + 1
+      $m5y = $y
+      if(($m5x -ge 0 -and $m5x -lt 10) -and ($m5y -ge 0 -and $m5y -lt 10)){
+        if($Global:boards.($selBoard)[$m5x,$m5y] -eq $emSp -or ($Global:boards.($selBoard)[$m5x,$m5y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m5x,$m5y)
+        }
+      }
+      $m6x = $x
+      $m6y = ($y - (1 * $pDir))
+      if(($m6x -ge 0 -and $m6x -lt 10) -and ($m6y -ge 0 -and $m6y -lt 10)){
+        if($Global:boards.($selBoard)[$m6x,$m6y] -eq $emSp -or ($Global:boards.($selBoard)[$m6x,$m6y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m6x,$m6y)
+        }
+      }
+      $m7x = $x - 1
+      $m7y = ($y - (1 * $pDir))
+      if(($m7x -ge 0 -and $m7x -lt 10) -and ($m7y -ge 0 -and $m7y -lt 10)){
+        if($Global:boards.($selBoard)[$m7x,$m7y] -eq $emSp -or ($Global:boards.($selBoard)[$m7x,$m7y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m7x,$m7y)
+        }
+      }
+      $m8x = $x + 1
+      $m8y = ($y - (1 * $pDir))
+      if(($m8x -ge 0 -and $m8x -lt 10) -and ($m8y -ge 0 -and $m8y -lt 10)){
+        if($Global:boards.($selBoard)[$m8x,$m8y] -eq $emSp -or ($Global:boards.($selBoard)[$m8x,$m8y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m8x,$m8y)
+        }
+      }
+      return $moveSet
+      break
+    }
+    "r+" {
+      forEach($mDir in @(1, -1)){
+        $searchMove = $true
+        $m1ys = $y
+        while($searchMove){
+          $m1x = $x
+          $m1y = ($m1ys + (1 * $mDir))
+          if(($m1x -ge 0 -and $m1x -lt 10) -and ($m1y -ge 0 -and $m1y -lt 10)){
+            if($Global:boards.($selBoard)[$m1x,$m1y] -ne $emSp){
+              $searchMove = $false
+            }
+            if(($Global:boards.($selBoard)[$m1x,$m1y]).Split("-")[1] -ne $pPos){
+              #Write-Host -f DarkYellow $Global:boards.($selBoard)[$m1x,$m1y]
+              $moveSet += getSpaceLoc @($m1x,$m1y)
+            }
+            $m1ys = $m1y        
+          }
+          else{
+            $searchMove = $false
+          }
+        }
+      }
+      forEach($mDir in @(1, -1)){
+        $searchMove = $true
+        $m2xs = $x
+        while($searchMove){
+          $m2x = ($m2xs + (1 * $mDir))
+          $m2y = $y
+          if(($m2x -ge 0 -and $m2x -lt 10) -and ($m2y -ge 0 -and $m2y -lt 10)){
+            if($Global:boards.($selBoard)[$m2x,$m2y] -ne $emSp){
+              $searchMove = $false
+            }
+            if(($Global:boards.($selBoard)[$m2x,$m2y]).Split("-")[1] -ne $pPos){
+              #Write-Host -f DarkYellow $Global:boards.($selBoard)[$m2x,$m2y]
+              $moveSet += getSpaceLoc @($m2x,$m2y)
+            }
+            $m2xs = $m2x        
+          }
+          else{
+            $searchMove = $false
+          }
+        }
+      }
+      $m3x = $x + 1
+      $m3y = ($y + (1 * $pDir))
+      if(($m3x -ge 0 -and $m3x -lt 10) -and ($m3y -ge 0 -and $m3y -lt 10)){
+        if($Global:boards.($selBoard)[$m3x,$m3y] -eq $emSp -or ($Global:boards.($selBoard)[$m3x,$m3y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m3x,$m3y)
+        }
+      }
+      $m4x = $x - 1
+      $m4y = ($y + (1 * $pDir))
+      if(($m4x -ge 0 -and $m4x -lt 10) -and ($m4y -ge 0 -and $m4y -lt 10)){
+        if($Global:boards.($selBoard)[$m4x,$m4y] -eq $emSp -or ($Global:boards.($selBoard)[$m4x,$m4y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m4x,$m4y)
+        }
+      }
+      $m5x = $x + 1
+      $m5y = ($y - (1 * $pDir))
+      if(($m5x -ge 0 -and $m5x -lt 10) -and ($m5y -ge 0 -and $m5y -lt 10)){
+        if($Global:boards.($selBoard)[$m5x,$m5y] -eq $emSp -or ($Global:boards.($selBoard)[$m5x,$m5y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m5x,$m5y)
+        }
+      }
+      $m6x = $x - 1
+      $m6y = ($y - (1 * $pDir))
+      if(($m6x -ge 0 -and $m6x -lt 10) -and ($m6y -ge 0 -and $m6y -lt 10)){
+        if($Global:boards.($selBoard)[$m6x,$m6y] -eq $emSp -or ($Global:boards.($selBoard)[$m6x,$m6y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m6x,$m6y)
+        }
+      }
+      return $moveSet
+      break
+    }
+    "b+" {
+      forEach($mDir in @(1, -1)){
+        $searchMove = $true
+        $m1xs = $x
+        $m1ys = $y
+        while($searchMove){
+          $m1x = ($m1xs + (1 * $mDir))
+          $m1y = ($m1ys - (1 * $mDir))
+          if(($m1x -ge 0 -and $m1x -lt 10) -and ($m1y -ge 0 -and $m1y -lt 10)){
+            if($Global:boards.($selBoard)[$m1x,$m1y] -ne $emSp){
+              $searchMove = $false
+            }
+            if(($Global:boards.($selBoard)[$m1x,$m1y]).Split("-")[1] -ne $pPos){
+              #Write-Host -f DarkYellow $Global:boards.($selBoard)[$m1x,$m1y]
+              $moveSet += getSpaceLoc @($m1x,$m1y)
+            }
+            $m1xs = $m1x
+            $m1ys = $m1y        
+          }
+          else{
+            $searchMove = $false
+          }
+        }
+      }
+      forEach($mDir in @(1, -1)){
+        $searchMove = $true
+        $m2ys = $y
+        $m2xs = $x
+        while($searchMove){
+          $m2x = ($m2xs + (1 * $mDir))
+          $m2y = ($m2ys + (1 * $mDir))
+          if(($m2x -ge 0 -and $m2x -lt 10) -and ($m2y -ge 0 -and $m2y -lt 10)){
+            if($Global:boards.($selBoard)[$m2x,$m2y] -ne $emSp){
+              $searchMove = $false
+            }
+            if(($Global:boards.($selBoard)[$m2x,$m2y]).Split("-")[1] -ne $pPos){
+              #Write-Host -f DarkYellow $Global:boards.($selBoard)[$m2x,$m2y]
+              $moveSet += getSpaceLoc @($m2x,$m2y)
+            }
+            $m2xs = $m2x
+            $m2ys = $m2y      
+          }
+          else{
+            $searchMove = $false
+          }
+        }
+      }
+      $m3x = $x
+      $m3y = ($y + (1 * $pDir))
+      if(($m3x -ge 0 -and $m3x -lt 10) -and ($m3y -ge 0 -and $m3y -lt 10)){
+        if($Global:boards.($selBoard)[$m3x,$m3y] -eq $emSp -or ($Global:boards.($selBoard)[$m3x,$m3y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m3x,$m3y)
+        }
+      }
+      $m4x = $x
+      $m4y = ($y - (1 * $pDir))
+      if(($m4x -ge 0 -and $m4x -lt 10) -and ($m4y -ge 0 -and $m4y -lt 10)){
+        if($Global:boards.($selBoard)[$m4x,$m4y] -eq $emSp -or ($Global:boards.($selBoard)[$m4x,$m4y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m4x,$m4y)
+        }
+      }
+      $m5x = $x + 1
+      $m5y = $y
+      if(($m5x -ge 0 -and $m5x -lt 10) -and ($m5y -ge 0 -and $m5y -lt 10)){
+        if($Global:boards.($selBoard)[$m5x,$m5y] -eq $emSp -or ($Global:boards.($selBoard)[$m5x,$m5y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m5x,$m5y)
+        }
+      }
+      $m6x = $x - 1
+      $m6y = $y
+      if(($m6x -ge 0 -and $m6x -lt 10) -and ($m6y -ge 0 -and $m6y -lt 10)){
+        if($Global:boards.($selBoard)[$m6x,$m6y] -eq $emSp -or ($Global:boards.($selBoard)[$m6x,$m6y]).Split("-")[1] -ne $pPos){
+          $moveSet += getSpaceLoc @($m6x,$m6y)
+        }
+      }
+      return $moveSet
+      break
+    }
   }
 }
 
@@ -268,6 +682,12 @@ function movePiece($selBoard,$orig,$dest){
     $Global:boards.($selBoard)[$destIn] = $Global:boards.($selBoard)[$origIn]
     $Global:boards.($selBoard)[$origIn] = $emSp
   }
+
+  #promotion check
+}
+
+function promotePiece($origIn){
+  
 }
 
 function dropPiece($selBoard,$piece,$dest){
@@ -344,7 +764,7 @@ function guidedMovePiece($player){
     $pieceChoice = selectPiece $boardChoice $player
     $moveChoice = selectMove $boardChoice $player $pieceChoice
     movepiece $boardChoice $pieceChoice $moveChoice
-    showBoard $boardChoice 0 $null $null
+    showBoard $boardChoice $null $null $null
   }
   guidedMovePieceMaster $player
 }

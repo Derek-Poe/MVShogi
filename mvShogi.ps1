@@ -6,13 +6,13 @@ function newBoard(){
   $Global:boardNum++
   $emSp = "" ; 1..(("$($Global:boardNum)-x-xx-x").Length) | % {$emSp += "."}
   $board = New-Object 'Object[,]' 9,9
-  $i = 0; @("$($Global:boardNum)-2-la-1","$($Global:boardNum)-2-kn-1","$($Global:boardNum)-2-si-1","$($Global:boardNum)-2-go-1","$($Global:boardNum)-2-ki-1","$($Global:boardNum)-2-go-2","$($Global:boardNum)-2-si-2","$($Global:boardNum)-2-kn-2","$($Global:boardNum)-2-la-2") | % {$board[$i,0] += $_; $i++}
-  $i = 0; @($emSp,"$($Global:boardNum)-2-ro-1",$emSp,$emSp,$emSp,$emSp,$emSp,"$($Global:boardNum)-2-bi-1",$emSp) | % {$board[$i,1] += $_; $i++}
-  $i = 0; @("$($Global:boardNum)-2-pa-1","$($Global:boardNum)-2-pa-2","$($Global:boardNum)-2-pa-3","$($Global:boardNum)-2-pa-4","$($Global:boardNum)-2-pa-5","$($Global:boardNum)-2-pa-6","$($Global:boardNum)-2-pa-7","$($Global:boardNum)-2-pa-8","$($Global:boardNum)-2-pa-9") | % {$board[$i,2] += $_; $i++}
+  $i = 0; @("$($Global:boardNum)-2-l_-1","$($Global:boardNum)-2-k_-1","$($Global:boardNum)-2-s_-1","$($Global:boardNum)-2-g_-1","$($Global:boardNum)-2-ki-1","$($Global:boardNum)-2-g_-2","$($Global:boardNum)-2-s_-2","$($Global:boardNum)-2-k_-2","$($Global:boardNum)-2-l_-2") | % {$board[$i,0] += $_; $i++}
+  $i = 0; @($emSp,"$($Global:boardNum)-2-r_-1",$emSp,$emSp,$emSp,$emSp,$emSp,"$($Global:boardNum)-2-b_-1",$emSp) | % {$board[$i,1] += $_; $i++}
+  $i = 0; @("$($Global:boardNum)-2-p_-1","$($Global:boardNum)-2-p_-2","$($Global:boardNum)-2-p_-3","$($Global:boardNum)-2-p_-4","$($Global:boardNum)-2-p_-5","$($Global:boardNum)-2-p_-6","$($Global:boardNum)-2-p_-7","$($Global:boardNum)-2-p_-8","$($Global:boardNum)-2-p_-9") | % {$board[$i,2] += $_; $i++}
   3..5 | % { $i = $_; $ii = 0; @($emSp,$emSp,$emSp,$emSp,$emSp,$emSp,$emSp,$emSp,$emSp) | % {$board[$ii,$i] += $_; $ii++}}
-  $i = 0; @("$($Global:boardNum)-1-pa-1","$($Global:boardNum)-1-pa-2","$($Global:boardNum)-1-pa-3","$($Global:boardNum)-1-pa-4","$($Global:boardNum)-1-pa-5","$($Global:boardNum)-1-pa-6","$($Global:boardNum)-1-pa-7","$($Global:boardNum)-1-pa-8","$($Global:boardNum)-1-pa-9") | % {$board[$i,6] += $_; $i++}
-  $i = 0; @($emSp,"$($Global:boardNum)-1-bi-1",$emSp,$emSp,$emSp,$emSp,$emSp,"$($Global:boardNum)-1-ro-1",$emSp) | % {$board[$i,7] += $_; $i++}
-  $i = 0; @("$($Global:boardNum)-1-la-1","$($Global:boardNum)-1-kn-1","$($Global:boardNum)-1-si-1","$($Global:boardNum)-1-go-1","$($Global:boardNum)-1-ki-1","$($Global:boardNum)-1-go-2","$($Global:boardNum)-1-si-2","$($Global:boardNum)-1-kn-2","$($Global:boardNum)-1-la-2") | % {$board[$i,8] += $_; $i++}
+  $i = 0; @("$($Global:boardNum)-1-p_-1","$($Global:boardNum)-1-p_-2","$($Global:boardNum)-1-p_-3","$($Global:boardNum)-1-p_-4","$($Global:boardNum)-1-p_-5","$($Global:boardNum)-1-p_-6","$($Global:boardNum)-1-p_-7","$($Global:boardNum)-1-p_-8","$($Global:boardNum)-1-p_-9") | % {$board[$i,6] += $_; $i++}
+  $i = 0; @($emSp,"$($Global:boardNum)-1-b_-1",$emSp,$emSp,$emSp,$emSp,$emSp,"$($Global:boardNum)-1-r_-1",$emSp) | % {$board[$i,7] += $_; $i++}
+  $i = 0; @("$($Global:boardNum)-1-l_-1","$($Global:boardNum)-1-k_-1","$($Global:boardNum)-1-s_-1","$($Global:boardNum)-1-g_-1","$($Global:boardNum)-1-ki-1","$($Global:boardNum)-1-g_-2","$($Global:boardNum)-1-s_-2","$($Global:boardNum)-1-k_-2","$($Global:boardNum)-1-l_-2") | % {$board[$i,8] += $_; $i++}
   $Global:boards | Add-Member -MemberType NoteProperty -Name $Global:boardNum -Value $board
 }
 
@@ -220,7 +220,7 @@ function getAvailMoves($selBoard,$loc){
   }
   $moveSet = @()
   switch($pType){
-    {$_ -eq "go" -or $_ -eq "p+" -or $_ -eq "s+" -or $_ -eq "k+" -or $_ -eq "l+"} {
+    {$_ -eq "g_" -or $_ -eq "p+" -or $_ -eq "s+" -or $_ -eq "k+" -or $_ -eq "l+"} {
       $m1x = $x
       $m1y = ($y + (1 * $pDir))
       if(($m1x -ge 0 -and $m1x -lt 10) -and ($m1y -ge 0 -and $m1y -lt 10)){
@@ -266,7 +266,7 @@ function getAvailMoves($selBoard,$loc){
       return $moveSet
       break
     }
-    "pa" {
+    "p_" {
       $m1x = $x
       $m1y = ($y + (1 * $pDir))
       if(($m1x -ge 0 -and $m1x -lt 10) -and ($m1y -ge 0 -and $m1y -lt 10)){
@@ -277,7 +277,7 @@ function getAvailMoves($selBoard,$loc){
       return $moveSet
       break
     }
-    "la" {
+    "l_" {
       $searchMove = $true
       $m1ys = $y
       while($searchMove){
@@ -300,7 +300,7 @@ function getAvailMoves($selBoard,$loc){
       return $moveSet
       break
     }
-    "ro" {
+    "r_" {
       forEach($mDir in @(1, -1)){
         $searchMove = $true
         $m1ys = $y
@@ -346,7 +346,7 @@ function getAvailMoves($selBoard,$loc){
       return $moveSet
       break
     }
-    "bi" {
+    "b_" {
       forEach($mDir in @(1, -1)){
         $searchMove = $true
         $m1xs = $x
@@ -396,7 +396,7 @@ function getAvailMoves($selBoard,$loc){
       return $moveSet
       break
     }
-    "kn" {
+    "k_" {
       $m1x = $x + 1
       $m1y = ($y + (2 * $pDir))
       if(($m1x -ge 0 -and $m1x -lt 10) -and ($m1y -ge 0 -and $m1y -lt 10)){
@@ -414,7 +414,7 @@ function getAvailMoves($selBoard,$loc){
       return $moveSet
       break
     }
-    "si" {
+    "s_" {
       $m1x = $x
       $m1y = ($y + (1 * $pDir))
       if(($m1x -ge 0 -and $m1x -lt 10) -and ($m1y -ge 0 -and $m1y -lt 10)){
@@ -669,10 +669,11 @@ function getAvailMoves($selBoard,$loc){
 }
 
 function movePiece($selBoard,$orig,$dest){
+  #promotion check for Origin and Destination
+
   $origIn = getSpaceIndex $orig
   $destIn = getSpaceIndex $dest
   $emSp = "" ; 1..(("$($selBoard)-x-xx-x").Length) | % {$emSp += "."}
-  #$origPlayer = ($Global:boards.($selBoard)[$origIn]).Split("-")[1]
   if($Global:boards.($selBoard)[$destIn] -eq $emSp){
     $Global:boards.($selBoard)[$destIn] = $Global:boards.($selBoard)[$origIn]
     $Global:boards.($selBoard)[$origIn] = $emSp
@@ -683,19 +684,31 @@ function movePiece($selBoard,$orig,$dest){
     $Global:boards.($selBoard)[$origIn] = $emSp
   }
 
-  #promotion check
+  #Assign Promotion Status
 }
 
-function promotePiece($origIn){
-  
+function promotionCheck($pieceIn){
+  #Promotion Zone is Last 3 Ranks
+  #Can Promote Upon Entering, Moving Through, or Exiting
+  #Promotion Forced on Pawns and Lances in the Last Rank or Knights in the Last 2 Ranks
+}
+
+function promotePiece($pieceIn){
+  #If piece is promotable(~), then promote(+)
+  #Else Error
 }
 
 function dropPiece($selBoard,$piece,$dest){
-  
+  #Must be able to move (Pawns, Knights, Lances)
+  #Only 1 Unpromoted Pawn in file
+  #No checkmating the King
+  #Unpromoted upon drop
 }
 
 function newMV($selBoard,$origIn,$destIn){
-  
+  #If more than one move is available, 
+  #Clone current board 
+  #then randomly move piece to one of the moves not selected
 }
 
 function guidedMovePiece($player){
@@ -765,6 +778,7 @@ function guidedMovePiece($player){
     $moveChoice = selectMove $boardChoice $player $pieceChoice
     movepiece $boardChoice $pieceChoice $moveChoice
     showBoard $boardChoice $null $null $null
+    #newMV
   }
   guidedMovePieceMaster $player
 }
